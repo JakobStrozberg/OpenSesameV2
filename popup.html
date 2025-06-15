@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<!--
+
+  
+  This HTML file defines the user interface for the Chrome extension popup. (the UI)
+
+  
+  deinftions include:
+  A status area for displaying feedback messages
+  A single line text input for user commands with @ mention support
+  A submit button that activates when text is entered
+  Hidden elements for login functionality and tools dropdown
+  A chat dialogue area that expands to show conversation history
+  
+  The design uses the Inter font family
+-->
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    /**
+     * Styles for Chrome Extension Popup
+     * 
+     * This stylesheet defines a minimal interface with:
+     * - Clean white background
+     * - Support for the Mundial font with appropriate fallbacks
+     * - Custom styling for form inputs, buttons, and status messages
+     * - Responsive scrollbar design for better aesthetics
+     * - Tools dropdown with hover effects and syntax highlighting
+     * - Expandable chat dialogue area for conversation history
+     * 
+     * The design emphasizes usability with clear visual feedback,
+     * smooth transitions, and accessible color contrasts.
+     */
+    
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+    
+    body {
+      width: 480px;
+      min-height: 50px;
+      padding: 0;
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #ffffff;
+      position: relative;
+      overflow: hidden;
+      animation: collapsePopup 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    
+    body.expanded {
+      height: 600px;
+      overflow-y: auto;
+      animation: expandPopup 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    
+    @font-face {
+      font-family: 'Mundial';
+      font-weight: 400;
+      font-style: normal;
+      src: local('Mundial Regular'), local('Mundial'), 
+           local('Helvetica Neue'), local('Arial');
+    }
+    
+    .container {
+      padding: 12px;
+      position: relative;
+      z-index: 1;
+      background: #ffffff;
+      min-height: 50px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    
+    body.expanded .container {
+      height: 600px;
+    }
+    
+    /* Initial state - only show input */
+    .initial-input-container {
+      display: block;
+    }
+    
+    body.expanded .initial-input-container {
+      display: none;
+    }
+    
+    /* Expanded state layout */
+    .expanded-layout {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      opacity: 0;
+    }
+    
+    body.expanded .expanded-layout {
+      display: flex;
+      animation: slideInContent 0.4s ease 0.2s forwards;
+    }
+    
+    /* Top bar with chats */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e8eaed;
+      margin-bottom: 12px;
+    }
+    
+    .new-chat-btn {
+      width: auto;
+      height: 32px;
+      padding: 0 16px;
+      background: #5a3a7e;
+      color: white;
+      border: none;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    
+    .new-chat-btn:hover {
+      background: #6a4a8e;
+      transform: scale(1.05);
+    }
+    
+    /* Horizontal chat list */
+    .chat-list-horizontal {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      flex: 1;
+      padding: 4px 0;
+    }
+    
+    .chat-list-horizontal::-webkit-scrollbar {
+      height: 4px;
+    }
+    
+    .chat-item {
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      white-space: nowrap;
+      font-size: 13px;
+      background: #f8f9fa;
+      border: 1px solid transparent;
+      flex-shrink: 0;
+    }
+    
+    .chat-item:hover {
+      background: #e8eaed;
+    }
+    
+    .chat-item.active {
+      background: #e8e3f0;
+      border-color: #d4cce0;
+    }
+    
+    .chat-item-delete {
+      display: none;
+      margin-left: 8px;
+      font-size: 12px;
+      color: #5f6368;
+    }
+    
+    .chat-item:hover .chat-item-delete {
+      display: inline;
+    }
+    
+    /* Minimize button */
+    .minimize-btn {
+      position: absolute;
+      top: 0px;
+      right: 0px;
+      background: none;
+      color: #5f6368;
+      border: none;
+      font-size: 24px;
+      font-weight: 300;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      z-index: 10;
+      line-height: 1;
+      padding: 4px 8px;
+      user-select: none;
+      outline: none;
+      box-shadow: none;
+    }
+    
+    .minimize-btn:focus {
+      outline: none;
+      box-shadow: none;
+    }
+    
+    .minimize-btn:hover {
+      color: #5f6368;
+      transform: scale(1.2);
+      background: none;
+      outline: none;
+      box-shadow: none;
+    }
+    
+    .minimize-btn:active {
+      transform: scale(0.95);
+    }
+    
+    /* Main chat area */
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 12px;
+    }
+    
+    /* Bottom input area */
+    .bottom-input-container {
+      padding-top: 12px;
+      border-top: 1px solid #e8eaed;
+    }
+    
+    .input-wrapper {
+      position: relative;
+      background: #5a3a7e;
+      border-radius: 25px;
+      border: 1px solid #4a2a6e;
+      transition: all 0.2s ease;
+    }
+    
+    .input-logo {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      opacity: 0.8;
+      filter: brightness(0) invert(1);
+    }
+    
+    .input-wrapper:focus-within {
+      border-color: #8a6aae;
+      background: #6a4a8e;
+      box-shadow: 0 0 0 3px rgba(138, 106, 174, 0.3);
+    }
+    
+    .input-group {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      gap: 8px;
+    }
+    
+    textarea {
+      flex: 1;
+      height: 24px;
+      min-height: 24px;
+      max-height: 24px;
+      padding: 0 0 0 40px;
+      border: none;
+      background: transparent;
+      font-size: 14px;
+      font-family: inherit;
+      resize: none;
+      line-height: 24px;
+      color: #ffffff;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    
+    textarea:focus {
+      outline: none;
+    }
+    
+    textarea::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .submit-btn {
+      width: 32px;
+      height: 32px;
+      background: #7a5a9e;
+      color: #4ade80;
+      border: none;
+      border-radius: 50%;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      flex-grow: 0;
+      padding: 0;
+    }
+    
+    .submit-btn.active {
+      background: #8a6aae;
+      color: #4ade80;
+    }
+    
+    .submit-btn:hover:not(:disabled) {
+      background: #8a6aae;
+      color: #4ade80;
+      transform: scale(1.05);
+    }
+    
+    .submit-btn.active:hover:not(:disabled) {
+      background: #7a5a9e;
+      color: #4ade80;
+    }
+    
+    .submit-btn:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+    
+    .submit-btn:disabled {
+      background: #4a3a5e;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    
+    .status {
+      padding: 10px 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      display: none;
+      animation: fadeIn 0.3s ease-out;
+      line-height: 1.4;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes expandPopup {
+      0% {
+        height: 50px;
+      }
+      60% {
+        height: 620px;
+      }
+      100% {
+        height: 600px;
+      }
+    }
+    
+    @keyframes collapsePopup {
+      0% {
+        height: 600px;
+      }
+      40% {
+        height: 40px;
+      }
+      100% {
+        height: 50px;
+      }
+    }
+    
+    @keyframes slideInContent {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .status.success {
+      background: #e6f4ea;
+      color: #137333;
+      border: 1px solid #c3e6cd;
+    }
+    
+    .status.error {
+      background: #fce8e6;
+      color: #d33b30;
+      border: 1px solid #f5c6c2;
+    }
+    
+    .status.loading {
+      background: #e8f0fe;
+      color: #1967d2;
+      border: 1px solid #d2e3fc;
+    }
+    
+    .status.info {
+      background: #e8f0fe;
+      color: #1967d2;
+      border: 1px solid #d2e3fc;
+    }
+    
+    /* Chat message styles */
+    .chat-message {
+      margin-bottom: 16px;
+      animation: messageSlideIn 0.3s ease-out;
+    }
+    
+    @keyframes messageSlideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    .message-user {
+      text-align: right;
+    }
+    
+    .message-assistant {
+      text-align: left;
+    }
+    
+    .message-bubble {
+      display: inline-block;
+      max-width: 85%;
+      padding: 12px 16px;
+      border-radius: 18px;
+      font-size: 14px;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+    
+    .message-user .message-bubble {
+      background: #5a3a7e;
+      color: #ffffff;
+      border-bottom-right-radius: 6px;
+    }
+    
+    .message-assistant .message-bubble {
+      background: #f1f3f4;
+      color: #202124;
+      border-bottom-left-radius: 6px;
+    }
+    
+    .message-time {
+      font-size: 11px;
+      color: #5f6368;
+      margin-top: 4px;
+      opacity: 0.8;
+    }
+    
+    .loading-indicator {
+      display: none;
+      padding: 12px 16px;
+      background: #f1f3f4;
+      border-radius: 18px;
+      border-bottom-left-radius: 6px;
+      color: #5f6368;
+      font-size: 14px;
+      max-width: 85%;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    .loading-indicator.visible {
+      display: inline-block;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+    
+    #intermediateSteps {
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 12px;
+      font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+      font-size: 11px;
+      max-height: 120px;
+      overflow-y: auto;
+      color: #5f6368;
+      line-height: 1.5;
+    }
+    
+    button {
+      background: #ffffff;
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: #202124;
+    }
+    
+    button:hover {
+      background: #f8f9fa;
+      border-color: #5f6368;
+    }
+    
+    #loginBtn {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      width: 100%;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+    
+    #loginBtn:hover {
+      background: #1557b0;
+    }
+    
+    #loginBtn:disabled {
+      background: #dadce0;
+      color: #80868b;
+    }
+    
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #dadce0;
+      border-radius: 3px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #bdc1c6;
+    }
+    
+    #toolsDropdown {
+      position: fixed;
+      background: white;
+      border: 1px solid #e8eaed;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      max-height: 300px;
+      overflow-y: auto;
+      display: none;
+      z-index: 1000;
+      width: 450px;
+    }
+    
+    #toolsDropdown .tool-item {
+      padding: 12px;
+      cursor: pointer;
+      border-bottom: 1px solid #f8f9fa;
+      transition: background-color 0.2s ease;
+    }
+    
+    #toolsDropdown .tool-item:hover {
+      background-color: #f8f9fa;
+    }
+    
+    #toolsDropdown .tool-item:last-of-type {
+      border-bottom: none;
+    }
+    
+    #toolsDropdown code {
+      background: #f1f3f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Initial state - only show input -->
+    <div class="initial-input-container">
+      <div id="status" class="status"></div>
+      
+      <div class="input-wrapper">
+        <img src="Logo.png" alt="Logo" class="input-logo">
+        <div class="input-group">
+          <textarea 
+            id="userInput" 
+            placeholder="Ask me anything about your projects, documents, or daily reports..."
+            autofocus
+          ></textarea>
+          <button id="submitBtn" class="submit-btn">
+            ⏎
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Expanded state layout -->
+    <div class="expanded-layout">
+      <!-- Minimize button in top right -->
+      <button id="minimizeBtn" class="minimize-btn" title="Minimize">−</button>
+      
+      <!-- Top bar with + button and chat list -->
+      <div class="top-bar">
+        <button id="newChatBtn" class="new-chat-btn" title="New Chat">+ New chat</button>
+        <div id="chatList" class="chat-list-horizontal">
+          <!-- Previous chats will be listed here -->
+        </div>
+      </div>
+      
+      <!-- Main chat area -->
+      <div id="chatContainer" class="chat-container">
+        <div id="chatMessages" class="chat-messages">
+          <!-- Chat messages will be dynamically added here -->
+        </div>
+        <div class="message-assistant">
+          <div id="loadingIndicator" class="loading-indicator">
+            <span>🤔 Thinking...</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Bottom input area -->
+      <div class="bottom-input-container">
+        <div id="statusExpanded" class="status"></div>
+        
+        <div class="input-wrapper">
+          <img src="Logo.png" alt="Logo" class="input-logo">
+          <div class="input-group">
+            <textarea 
+              id="userInputExpanded" 
+              placeholder="Ask me anything about your projects, documents, or daily reports..."
+            ></textarea>
+            <button id="submitBtnExpanded" class="submit-btn">
+              ⏎
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html> 

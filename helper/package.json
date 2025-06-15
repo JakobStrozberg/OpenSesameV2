@@ -1,0 +1,29 @@
+{
+  "name": "llm-agent-helper",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Helper service for LLM Agent Chrome Extension",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test:selectors": "node test-calendar-selectors.js"
+  },
+  "dependencies": {
+    "@langchain/community": "^0.0.10",
+    "@langchain/core": "^0.1.5",
+    "@langchain/openai": "^0.0.14",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "google-auth-library": "^10.0.0-rc.3",
+    "googleapis": "^150.0.1",
+    "langchain": "^0.0.212",
+    "playwright": "^1.40.0",
+    "uuid": "^9.0.1",
+    "zod": "^3.22.4"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

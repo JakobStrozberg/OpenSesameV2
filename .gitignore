@@ -1,0 +1,25 @@
+# Node modules
+node_modules/
+helper/node_modules/
+
+# Environment variables
+.env
+helper/.env
+
+# Browser persistent data
+helper/browser-data/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# package-lock.json
+# helper/package-lock.json 
