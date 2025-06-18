@@ -1,6 +1,26 @@
 # OpenSesame Chrome Extension
 
-A Chrome extension that uses an GPT-4 to automate browser tasks.
+A beautiful Chrome extension I made that leverages GPT-4o and Langchain to help automate browser tasks, send emails, and add events to google calendar. This extension can:
+
+- Create calendar events automatically
+- Go to specific webpages (for example specific subreddits, social media accounts)
+- Search the web
+- Send emails for you
+- Create new google docs, sheets, and more
+- Take screenshots
+- Open new tabs
+....and much more! 
+
+## Screenshot examples
+
+<img width="1723" alt="closed" src="https://github.com/user-attachments/assets/637d22a4-3c52-43ec-9aa2-503874caa5d5" />
+
+<img width="1728" alt="open" src="https://github.com/user-attachments/assets/3aa38b2c-4513-49b3-afa7-d8225ccc2520" />
+
+<img width="1728" alt="reddit" src="https://github.com/user-attachments/assets/e41215be-89af-4748-a604-510fa8682504" />
+
+<img width="1724" alt="cats" src="https://github.com/user-attachments/assets/392e15c0-836d-4067-ae13-2b54b20075e3" />
+
 
 
 ## Setup
