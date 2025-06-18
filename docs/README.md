@@ -13,15 +13,15 @@ A beautiful Chrome extension I made that leverages GPT-4o and Langchain to help 
 
 ## Screenshot examples
 
-The extension is present all pages, and can be moved around your browser:
+This extension is a floating chatbar shown on all pages. It can be moved around your browser wherever you like:
 
 <img width="1723" alt="closed" src="https://github.com/user-attachments/assets/637d22a4-3c52-43ec-9aa2-503874caa5d5" />
 
-It can be expanded to show a dialogue, with chats and messages being saved Persistently, sending an email or adding a new event to your calendar is automatic and easy:
+The chatbar can be expanded to show a chat dialogue, with message history being saved persistently across tabs and chrome sessions. Sending an email or adding a new event to your calendar is automatic and easy:
 
 <img width="1728" alt="open" src="https://github.com/user-attachments/assets/3aa38b2c-4513-49b3-afa7-d8225ccc2520" />
 
-Examples on multiple webpages, I tired to make appealing animations and UI: 
+Here are some examples on different webpages, I made the UI and animations look appealing and professional:
 
 <img width="1728" alt="reddit" src="https://github.com/user-attachments/assets/e41215be-89af-4748-a604-510fa8682504" />
 
